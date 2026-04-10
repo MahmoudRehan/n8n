@@ -1,0 +1,54 @@
+@model n8n.ViewModels.ChatIndexViewModel
+@{
+    ViewData["Title"] = "AI Chat";
+}
+
+<div class="chat-layout">
+    <aside class="conversation-panel">
+        <div class="conversation-panel-header">
+            <h5>Conversations</h5>
+            <a asp-controller="Chat" asp-action="Index" asp-route-newConversation="true" class="btn btn-sm btn-primary">New</a>
+        </div>
+
+        <div class="conversation-list">
+            @foreach (var conversation in Model.Conversations)
+            {
+                <a asp-controller="Chat"
+                   asp-action="Index"
+                   asp-route-conversationId="@conversation.Id"
+                   class="conversation-item @(conversation.Id == Model.CurrentConversationId ? "active" : string.Empty)">
+                    <span class="title">@conversation.Title</span>
+                    <small>@conversation.CreatedAt.ToLocalTime().ToString("g")</small>
+                </a>
+            }
+        </div>
+    </aside>
+
+    <section class="chat-panel">
+        <div id="chatHistory" class="chat-history">
+            @foreach (var message in Model.Messages)
+            {
+                var cssClass = message.Sender == "User" ? "message user" : "message ai";
+                <div class="@cssClass">
+                    <div class="bubble">@message.Content</div>
+                </div>
+            }
+        </div>
+
+        <form id="chatForm" class="chat-input-wrapper">
+            <input type="hidden" id="conversationId" value="@Model.CurrentConversationId" />
+            <div class="input-group">
+                <input id="messageInput" type="text" class="form-control" maxlength="4000" placeholder="Type your message..." autocomplete="off" />
+                <button id="sendButton" type="submit" class="btn btn-primary">Send</button>
+            </div>
+            <div id="loading" class="loading-indicator d-none">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Waiting for AI response...</span>
+            </div>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+}
